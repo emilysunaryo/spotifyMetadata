@@ -59,10 +59,10 @@ async function getTrackMetadata(trackID, access_token) {
 export {getToken, searchTrack, getTrackInfo, getTrackMetadata}
 
 
-getToken().then(response => {
-  searchTrack("Buddy Holly", "That'll Be The", response.access_token).then(profile => {
-    console.log(profile)
-  })
-});
+// getToken().then(response => {
+//   searchTrack("Britney Spears", "I'm Not A Girl", response.access_token).then(profile => {
+//     console.log(profile)
+//   })
+// });
 
 

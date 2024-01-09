@@ -41,12 +41,14 @@ async function getAllData() {
 async function getAllHTSongData() {
   try {
       // Replace 'your_table' with the actual table name
-      const [rows, fields] = await pool.query('SELECT * FROM ht_songs LIMIT 10');
+      const [rows, fields] = await pool.query('SELECT * FROM songMeta LIMIT 10');
       console.log(rows);
   } catch (err) {
       console.error('Error during database query', err);
   }
 }
+
+getAllHTSongData();
 
 async function getJoinedSongData() {
   try {
@@ -54,7 +56,7 @@ async function getJoinedSongData() {
           SELECT ht_songs.ID, ht_songs.artist, ht_songs.song 
           FROM ht_songs
           JOIN wiki ON ht_songs.ID = wiki.ht_songs_id
-          LIMIT 4
+          LIMIT 3
       `;
       const [rows, fields] = await pool.query(query);
       console.log(rows);

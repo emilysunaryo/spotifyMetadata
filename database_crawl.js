@@ -25,8 +25,17 @@ async function getSpotifyTrackIDs() {
     return spotifyIDs
 }
 
+// getSpotifyTrackIDs()
 
-// change ID key back into int from string!!
+
+function getGenreString(genres) {
+    if (genres && genres.length > 0) {
+        return genres.join(', ');
+    } else {
+        return '';
+    }
+}
+
 async function getSpotifyMetadataObjects() {
     const allMetaObjects = [];
     const tokenResponse = await getToken();
@@ -38,33 +47,33 @@ async function getSpotifyMetadataObjects() {
             const value = spotifyIds[key];
 
             const trackInfo = await getTrackInfo(value , accessToken);
-            console.log("Track Info:", trackInfo);
-
             const trackMeta = await getTrackMetadata(value , accessToken);
-            console.log("Track Info:", trackMeta);
+    
             let customObject = {
                 wikiID: parseInt(key), 
                 spotifyID: value,
-                songName: trackMeta.name, 
-                artistName: trackMeta.artists[0].name, 
-                year: parseInt(trackMeta.album.release_date.slice(0, 4)), 
-                genre: trackMeta.genres[0], 
-                acousticness: trackInfo.acousticness,
-                danceability: trackInfo.danceability,
-                duration_ms: trackInfo.duration_ms,
-                energy: trackInfo.energy,
-                instrumentalness: trackInfo.instrumentalness,
-                time_signature: trackInfo.time_signature,
-                key: trackInfo.key,
-                liveness: trackInfo.liveness,
-                loudness: trackInfo.loudness,
-                tempo: trackInfo.tempo,
-                valence: trackInfo.valence
+                songName: trackInfo.name, 
+                artistName: trackInfo.artists[0].name, 
+                year: parseInt(trackInfo.album.release_date.slice(0, 4)), 
+                genre: getGenreString(trackInfo.artists[0].genres), //genres that are associated with the artist, not the specific track
+                acousticness: trackMeta.acousticness,
+                danceability: trackMeta.danceability,
+                duration_ms: trackMeta.duration_ms,
+                energy: trackMeta.energy,
+                instrumentalness: trackMeta.instrumentalness,
+                time_signature: trackMeta.time_signature,
+                key: trackMeta.key,
+                liveness: trackMeta.liveness,
+                loudness: trackMeta.loudness,
+                tempo: trackMeta.tempo,
+                valence: trackMeta.valence
             };
             allMetaObjects.push(customObject);
             console.log("Custom Object:", customObject)
+            console.log("testing output of function:", allMetaObjects)
         }
     }
+    return allMetaObjects
 }
 
 getSpotifyMetadataObjects();
@@ -89,7 +98,7 @@ let customObject = {
     valence: 0
 }
 
-export {getSpotifyMetadataObjects}
+// export {getSpotifyMetadataObjects}
 
 // getToken().then(response => {
 //     getTrackInfo("11dFghVXANMlKmJXsNCbNl", response.access_token).then(profile => {

@@ -24,7 +24,7 @@ async function getSpotifyTrackIDs(songID) {
     
     return spotifyIDs
 }
-getSpotifyTrackIDs(3850)
+// getSpotifyTrackIDs(3850)
 
 function getGenreString(genres) {
     if (genres && genres.length > 0) {
@@ -39,12 +39,12 @@ async function getSpotifyMetadataObject(songID) {
     const tokenResponse = await getToken();
     const accessToken = tokenResponse.access_token;
     const spotifyId = await getSpotifyTrackIDs(songID);
-    console.log("testing output of getSpotifyTrackIDs:", spotifyId)
+    // console.log("testing output of getSpotifyTrackIDs:", spotifyId)
     
     const value = spotifyId[songID];
     //check to see if the song does not exist in spotify api, returns empty object
     if (!value) {  // If value is null or undefined, meaning the track was not found
-        return {
+        return nullObject = {
             wikiID: songID, 
             spotifyID: null,
             songName: null, 
@@ -65,35 +65,35 @@ async function getSpotifyMetadataObject(songID) {
             isCrawled: 1
         };
     }
-    
-    console.log("testing dictionary grab of value:", value)
 
     const trackInfo = await getTrackInfo(value , accessToken);
     const trackMeta = await getTrackMetadata(value , accessToken);
 
-        customObject = {
-            wikiID: songID, 
-            spotifyID: value,
-            songName: trackInfo.name, 
-            artistName: trackInfo.artists[0].name, 
-            year: parseInt(trackInfo.album.release_date.slice(0, 4)), 
-            genre: getGenreString(trackInfo.artists[0].genres), //genres that are associated with the artist, not the specific track
-            acousticness: trackMeta.acousticness,
-            danceability: trackMeta.danceability,
-            duration_ms: trackMeta.duration_ms,
-            energy: trackMeta.energy,
-            instrumentalness: trackMeta.instrumentalness,
-            time_signature: trackMeta.time_signature,
-            key: trackMeta.key,
-            liveness: trackMeta.liveness,
-            loudness: trackMeta.loudness,
-            tempo: trackMeta.tempo,
-            valence: trackMeta.valence,
-            isCrawled: 1
-            };
+    customObject = {
+        wikiID: songID, 
+        spotifyID: value,
+        songName: trackInfo.name, 
+        artistName: trackInfo.artists[0].name, 
+        year: parseInt(trackInfo.album.release_date.slice(0, 4)), 
+        genre: getGenreString(trackInfo.artists[0].genres), //genres that are associated with the artist, not the specific track
+        acousticness: trackMeta.acousticness,
+        danceability: trackMeta.danceability,
+        duration_ms: trackMeta.duration_ms,
+        energy: trackMeta.energy,
+        instrumentalness: trackMeta.instrumentalness,
+        time_signature: trackMeta.time_signature,
+        key: trackMeta.key,
+        liveness: trackMeta.liveness,
+        loudness: trackMeta.loudness,
+        tempo: trackMeta.tempo,
+        valence: trackMeta.valence,
+        isCrawled: 1
+        };
     console.log("Custom Object:", customObject)
     return customObject
 }
+
+// getSpotifyMetadataObject(3850);
 
 let customObject = {
     wikiID: 0,

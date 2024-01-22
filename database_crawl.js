@@ -1,29 +1,11 @@
-import { checkDatabaseConnection, getJoinedSongData} from "./HT_database.js";
-import { getSpotifyMetadataObjects } from "./spotify_meta.js";
+import { checkDatabaseConnection, getJoinedSongData, checkIfCrawled} from "./HT_database.js";
+import { getSpotifyMetadataObject } from "./spotify_meta.js";
 
 
 //BRAINSTORM:
-//brainstorm isCrawled flag, could populate a model with nothing in it: 'not found' if song does not exist on spotify???
-//link wiki to corresponding model in second table - list of wiki: spotifymetaId
 //merge to hookpad repo --> notescripts where all the crawls live and where the cron lives
 //how often is the api limit for spotify??? --> crawl first 1000 now and crawl next 1000 later? 
-//around 47,000 --> 
-
-
-//isCrawled will check if the songSpotifyMetadata has already been populated or not, default set to false
-async function checkIfCrawled(dbconnection, wikiID) {
-    const query = 'SELECT isCrawled FROM songSpotifyMetadata WHERE wikiID = ?';
-    try {
-        const results = await dbconnection.query(query, [wikiID]);
-        if (results[0].isCrawled) {
-            return true;
-        }
-        return false;
-    } catch (error) {
-        console.error("Error in checkIfPopulated:", error);
-        throw error;
-    }
-}
+//around 47,000 songs on ht_database
 
 //start of the database crawl function 
 async function databaseCrawl() {
@@ -38,7 +20,7 @@ async function databaseCrawl() {
             for (const row of songDataBatch) {
                 const crawled = await checkIfCrawled(dbconnection, row.ID);
                 if (!crawled) {
-                    const customObject = await getSpotifyMetadataObjects(row.ID);
+                    const customObject = await getSpotifyMetadataObject(row.ID);
                     customObjectArray.push(customObject);
                 }
             }
@@ -57,35 +39,6 @@ async function databaseCrawl() {
     }
 }
 
-//ususally batch sending 1000 at a time
-async function insertBatch(dbconnection, data) {
-    const query = `
-        INSERT INTO songSpotifyMetadata (
-            wikiID, spotifyID, songName, artistName, year, genre,
-            acousticness, danceability, duration_ms, energy, instrumentalness,
-            time_signature, key, liveness, loudness, tempo, valence, isPopulated
-        ) VALUES ? 
-        ON DUPLICATE KEY UPDATE
-            spotifyID = VALUES(spotifyID),
-            songName = VALUES(songName),
-            artistName = VALUES(artistName),
-            year = VALUES(year),
-            genre = VALUES(genre),
-            acousticness = VALUES(acousticness),
-            danceability = VALUES(danceability),
-            duration_ms = VALUES(duration_ms),
-            energy = VALUES(energy),
-            instrumentalness = VALUES(instrumentalness),
-            time_signature = VALUES(time_signature),
-            key = VALUES(key),
-            liveness = VALUES(liveness),
-            loudness = VALUES(loudness),
-            tempo = VALUES(tempo),
-            valence = VALUES(valence),
-            isCrawled = VALUES(isCrawled);
-    `;
 
-    const values = data.map(item => Object.values(item));
-    await dbconnection.query(query, [values]);
-}
+
 

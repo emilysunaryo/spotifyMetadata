@@ -57,7 +57,58 @@ async function getJoinedSongDataById(songId) {
   }
 }
 
-getJoinedSongDataById(3850);
+//isCrawled will check if the songSpotifyMetadata has already been populated or not, default set to false
+async function checkIfCrawled(wikiID) {
+  const query = 'SELECT isCrawled FROM songSpotifyMetadata WHERE wikiID = ?';
+  try {
+      const results = await pool.query(query, [wikiID]);
+      if (results.length > 0 && results[0].isCrawled) {
+          return true;
+      }
+      return false;
+  } catch (error) {
+      console.error("Error in checkIfPopulated:", error);
+      throw error;
+  }
+}
+
+//batch sending 1000 at a time
+async function insertBatch(data) {
+  const query = `
+      INSERT INTO songSpotifyMetadata (
+          wikiID, spotifyID, songName, artistName, year, genre,
+          acousticness, danceability, duration_ms, energy, instrumentalness,
+          time_signature, key, liveness, loudness, tempo, valence, isCrawled
+      ) VALUES ? 
+      ON DUPLICATE KEY UPDATE
+          spotifyID = VALUES(spotifyID),
+          songName = VALUES(songName),
+          artistName = VALUES(artistName),
+          year = VALUES(year),
+          genre = VALUES(genre),
+          acousticness = VALUES(acousticness),
+          danceability = VALUES(danceability),
+          duration_ms = VALUES(duration_ms),
+          energy = VALUES(energy),
+          instrumentalness = VALUES(instrumentalness),
+          time_signature = VALUES(time_signature),
+          key = VALUES(key),
+          liveness = VALUES(liveness),
+          loudness = VALUES(loudness),
+          tempo = VALUES(tempo),
+          valence = VALUES(valence),
+          isCrawled = VALUES(isCrawled);
+  `;
+  const values = data.map(item => Object.values(item));
+  try {
+    await pool.query(query, [values]);
+} catch (error) {
+    console.error('Error during batch insert:', error);
+    throw error; // Or handle it in another appropriate way
+  }
+}
 
 
-export { getJoinedSongData, getJoinedSongDataById, checkDatabaseConnection};
+
+
+export { getJoinedSongData, getJoinedSongDataById, checkDatabaseConnection, checkIfCrawled, insertBatch};

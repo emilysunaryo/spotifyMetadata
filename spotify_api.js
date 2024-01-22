@@ -37,7 +37,6 @@ async function searchTrack(artistName, trackName, access_token) {
       headers: { 'Authorization': 'Bearer ' + access_token },
     });
   const spotifyResponse = await response.json();
-  console.log("testing output of undefined searchTrack function:", spotifyResponse.tracks.items[0].id)
   const songID = spotifyResponse.tracks.items[0].id;
   return songID
 }

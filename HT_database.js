@@ -24,21 +24,21 @@ async function checkDatabaseConnection() {
 
   // checkDatabaseConnection()
 
-async function getJoinedSongData() {
-  try {
-      const query = `
-          SELECT ht_songs.ID, ht_songs.artist, ht_songs.song 
-          FROM ht_songs
-          JOIN wiki ON ht_songs.ID = wiki.ht_songs_id
-          LIMIT 10
-      `;
-      const [rows, fields] = await pool.query(query);
-      console.log(rows);
-      return rows
-  } catch (err) {
-      console.error('Error during database query', err);
+  async function getJoinedSongData(batchSize, offset) {
+    try {
+        const query = `
+            SELECT ht_songs.ID, ht_songs.artist, ht_songs.song 
+            FROM ht_songs
+            JOIN wiki ON ht_songs.ID = wiki.ht_songs_id
+            LIMIT ?, ?
+        `;
+        const [rows, fields] = await pool.query(query, [offset, batchSize]);
+        console.log(rows);
+        return rows
+    } catch (err) {
+        console.error('Error during database query', err);
+    }
   }
-}
 
 async function getJoinedSongDataById(songId) {
   try {
@@ -57,7 +57,7 @@ async function getJoinedSongDataById(songId) {
   }
 }
 
-// getJoinedSongDataById(3850);
+getJoinedSongDataById(3850);
 
 
 export { getJoinedSongData, getJoinedSongDataById, checkDatabaseConnection};

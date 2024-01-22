@@ -18,12 +18,13 @@ async function getSpotifyTrackIDs(songID) {
             console.log("Spotify ID:", trackId);
             spotifyIDs[wikiSongID] = trackId;
         } catch (error) {
+            spotifyIDs[wikiSongId] = null;
             console.error("Error getting track info:", error);
         }
     
     return spotifyIDs
 }
-// getSpotifyTrackIDs(3850)
+getSpotifyTrackIDs(3850)
 
 function getGenreString(genres) {
     if (genres && genres.length > 0) {
@@ -41,6 +42,30 @@ async function getSpotifyMetadataObject(songID) {
     console.log("testing output of getSpotifyTrackIDs:", spotifyId)
     
     const value = spotifyId[songID];
+    //check to see if the song does not exist in spotify api, returns empty object
+    if (!value) {  // If value is null or undefined, meaning the track was not found
+        return {
+            wikiID: songID, 
+            spotifyID: null,
+            songName: null, 
+            artistName: null, 
+            year: 0, 
+            genre: null,
+            acousticness: 0,
+            danceability: 0,
+            duration_ms: 0,
+            energy: 0,
+            instrumentalness: 0,
+            time_signature: 0,
+            key: 0,
+            liveness: 0,
+            loudness: 0,
+            tempo: 0,
+            valence: 0,
+            isCrawled: 1
+        };
+    }
+    
     console.log("testing dictionary grab of value:", value)
 
     const trackInfo = await getTrackInfo(value , accessToken);
@@ -63,13 +88,12 @@ async function getSpotifyMetadataObject(songID) {
             liveness: trackMeta.liveness,
             loudness: trackMeta.loudness,
             tempo: trackMeta.tempo,
-            valence: trackMeta.valence
+            valence: trackMeta.valence,
+            isCrawled: 1
             };
     console.log("Custom Object:", customObject)
     return customObject
 }
-
-// getSpotifyMetadataObject(3850);
 
 let customObject = {
     wikiID: 0,
@@ -88,16 +112,13 @@ let customObject = {
     liveness: 0,
     loudness: 0,
     tempo: 0,
-    valence: 0
+    valence: 0,
+    isCrawled: 0
 }
 
 export {getSpotifyMetadataObject}
 
-// getToken().then(response => {
-//     getTrackInfo("11dFghVXANMlKmJXsNCbNl", response.access_token).then(profile => {
-//       console.log(profile)
-//     })
-//   });
+
 
 
 

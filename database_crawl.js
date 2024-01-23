@@ -1,4 +1,4 @@
-import { checkDatabaseConnection, getJoinedSongData, checkIfCrawled} from "./HT_database.js";
+import { checkDatabaseConnection, getJoinedSongData, checkIfCrawled, insertBatch} from "./HT_database.js";
 import { getSpotifyMetadataObject } from "./spotify_meta.js";
 
 
@@ -10,27 +10,30 @@ import { getSpotifyMetadataObject } from "./spotify_meta.js";
 //start of the database crawl function 
 async function databaseCrawl() {
     try {
-        const dbconnection = await checkDatabaseConnection();
-        const batchSize = 1000;
+        const batchSize = 10;
         let offset = 0;
         let hasMoreData = true;
-        while(hasMoreData) {
+        let iterationCount = 0; 
+        const maxIterations = 2; 
+        while(hasMoreData && iterationCount < maxIterations) {
             const songDataBatch = await getJoinedSongData(batchSize, offset);
             const customObjectArray = [];
             for (const row of songDataBatch) {
-                const crawled = await checkIfCrawled(dbconnection, row.ID);
+                const crawled = await checkIfCrawled(row.ID);
                 if (!crawled) {
                     const customObject = await getSpotifyMetadataObject(row.ID);
                     customObjectArray.push(customObject);
+                    console.log("pushing custom Object to array:", customObject)
                 }
             }
             if (customObjectArray.length > 0) {
-                await insertBatch(dbconnection, customObjectArray)
+                await insertBatch(customObjectArray)
             }
             if (songDataBatch.length < batchSize) {
-                hasMoreData = false; // No more data to process
+                hasMoreData = false; 
             } else {
-                offset += songDataBatch.length; // Move offset to the next batch
+                offset += songDataBatch.length;
+                iterationCount++; // move offset to the next batch
             }
         }
   
@@ -38,6 +41,9 @@ async function databaseCrawl() {
         console.error("Error processing wiki rows:", error);
     }
 }
+
+
+databaseCrawl();
 
 
 

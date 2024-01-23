@@ -72,43 +72,64 @@ async function checkIfCrawled(wikiID) {
   }
 }
 
+async function checkSpotifyMetaDataInsertion() {
+  const query = `SELECT * FROM songSpotifyMetadata`;
+  try {
+    const results = await pool.query(query);
+    console.log("testing results from songSpotifyMeta table", results)
+
+  } catch(error) {
+    console.log("error fetching data from songSpotifyMeta", error);
+
+  }
+
+}
+
 //batch sending 1000 at a time
 async function insertBatch(data) {
   const query = `
-      INSERT INTO songSpotifyMetadata (
-          wikiID, spotifyID, songName, artistName, year, genre,
-          acousticness, danceability, duration_ms, energy, instrumentalness,
-          time_signature, key, liveness, loudness, tempo, valence, isCrawled
-      ) VALUES ? 
-      ON DUPLICATE KEY UPDATE
-          spotifyID = VALUES(spotifyID),
-          songName = VALUES(songName),
-          artistName = VALUES(artistName),
-          year = VALUES(year),
-          genre = VALUES(genre),
-          acousticness = VALUES(acousticness),
-          danceability = VALUES(danceability),
-          duration_ms = VALUES(duration_ms),
-          energy = VALUES(energy),
-          instrumentalness = VALUES(instrumentalness),
-          time_signature = VALUES(time_signature),
-          key = VALUES(key),
-          liveness = VALUES(liveness),
-          loudness = VALUES(loudness),
-          tempo = VALUES(tempo),
-          valence = VALUES(valence),
-          isCrawled = VALUES(isCrawled);
-  `;
+  INSERT INTO songSpotifyMetadata (
+      wikiID, spotifyID, songName, artistName, year, genre,
+      acousticness, danceability, duration_ms, energy, instrumentalness,
+      time_signature, \`key\`, liveness, loudness, tempo, valence, isCrawled
+  ) VALUES ?
+  ON DUPLICATE KEY UPDATE
+      spotifyID = VALUES(spotifyID),
+      songName = VALUES(songName),
+      artistName = VALUES(artistName),
+      year = VALUES(year),
+      genre = VALUES(genre),
+      acousticness = VALUES(acousticness),
+      danceability = VALUES(danceability),
+      duration_ms = VALUES(duration_ms),
+      energy = VALUES(energy),
+      instrumentalness = VALUES(instrumentalness),
+      time_signature = VALUES(time_signature),
+      \`key\` = VALUES(\`key\`),
+      liveness = VALUES(liveness),
+      loudness = VALUES(loudness),
+      tempo = VALUES(tempo),
+      valence = VALUES(valence),
+      isCrawled = VALUES(isCrawled);
+`;
   const values = data.map(item => Object.values(item));
   try {
-    await pool.query(query, [values]);
+    console.log("Initiating database push with data:", values);
+    const result = await pool.query(query, [values]);
+    console.log("Database push complete, result:", result);
 } catch (error) {
     console.error('Error during batch insert:', error);
-    throw error; // Or handle it in another appropriate way
+    throw error; 
   }
 }
 
+checkSpotifyMetaDataInsertion();
 
 
-
-export { getJoinedSongData, getJoinedSongDataById, checkDatabaseConnection, checkIfCrawled, insertBatch};
+export { 
+  getJoinedSongData,
+  getJoinedSongDataById,
+  checkDatabaseConnection, 
+  checkIfCrawled, 
+  insertBatch
+};

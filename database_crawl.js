@@ -1,4 +1,4 @@
-import { checkDatabaseConnection, getJoinedSongData, checkIfCrawled, insertBatch} from "./HT_database.js";
+import {  getJoinedSongData, checkIfCrawled, insertBatch} from "./HT_database.js";
 import { getSpotifyMetadataObject } from "./spotify_meta.js";
 
 
@@ -10,11 +10,11 @@ import { getSpotifyMetadataObject } from "./spotify_meta.js";
 //start of the database crawl function 
 async function databaseCrawl() {
     try {
-        const batchSize = 10;
+        const batchSize = 20;
         let offset = 0;
         let hasMoreData = true;
         let iterationCount = 0; 
-        const maxIterations = 2; 
+        const maxIterations = 3; 
         while(hasMoreData && iterationCount < maxIterations) {
             const songDataBatch = await getJoinedSongData(batchSize, offset);
             const customObjectArray = [];

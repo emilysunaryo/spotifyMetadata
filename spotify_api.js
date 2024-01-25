@@ -41,22 +41,79 @@ async function searchTrack(artistName, trackName, access_token) {
   return songID
 }
 
-async function getTrackInfo(trackID, access_token) {
-  const response = await fetch(`https://api.spotify.com/v1/tracks/${trackID}`, {
-    method: 'GET',
-    headers: { 'Authorization': 'Bearer ' + access_token },
-  });
+// async function getTrackInfo(trackID, access_token) {
+//   const response = await fetch(`https://api.spotify.com/v1/tracks/${trackID}`, {
+//     method: 'GET',
+//     headers: { 'Authorization': 'Bearer ' + access_token },
+//   });
 
-  return await response.json();
+//   return await response.json();
+// }
+
+// async function getTrackMetadata(trackID, access_token) {
+//     const response = await fetch(`https://api.spotify.com/v1/audio-features/${trackID}`, {
+//         method: 'GET',
+//         headers: { 'Authorization': 'Bearer ' + access_token },
+//       });
+//     return await response.json();
+
+// }
+
+async function getTrackInfo(trackID, access_token) {
+  try {
+    const response = await fetch(`https://api.spotify.com/v1/tracks/${trackID}`, {
+      method: 'GET',
+      headers: { 'Authorization': 'Bearer ' + access_token },
+    });
+
+    if (response.statusCode === 200) {
+      return await response.json();
+    } else if (response.statusCode === 429) {
+      const retryAfter = response.headers['retry-after'] ? parseInt(response.headers['retry-after']) * 1000 : null;
+      throw {
+        message: 'Rate Limit Exceeded',
+        statusCode: 429,
+        retryAfter: retryAfter
+      };
+    } else {
+      throw {
+        message: `Received unexpected status code ${response.statusCode}`,
+        statusCode: response.statusCode
+      };
+    }
+
+  } catch (error) {
+    console.error('Error fetching track info:', error);
+    throw error; // Re-throw the error if you want to handle it further up the call stack
+  }
 }
 
 async function getTrackMetadata(trackID, access_token) {
+  try {
     const response = await fetch(`https://api.spotify.com/v1/audio-features/${trackID}`, {
-        method: 'GET',
-        headers: { 'Authorization': 'Bearer ' + access_token },
-      });
-    return await response.json();
+      method: 'GET',
+      headers: { 'Authorization': 'Bearer ' + access_token },
+    });
 
+    if (response.statusCode === 200) {
+      return await response.json();
+    } else if (response.statusCode === 429) {
+      const retryAfter = response.headers['retry-after'] ? parseInt(response.headers['retry-after']) * 1000 : null;
+      throw {
+        message: 'Rate Limit Exceeded',
+        statusCode: 429,
+        retryAfter: retryAfter
+      };
+    } else {
+      throw {
+        message: `Received unexpected status code ${response.statusCode}`,
+        statusCode: response.statusCode
+      };
+    }
+  } catch (error) {
+    console.error('Error fetching track metadata:', error);
+    throw error; // Re-throw the error if you want to handle it further up the call stack
+  }
 }
 
 
